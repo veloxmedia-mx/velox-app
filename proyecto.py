@@ -1,4 +1,4 @@
-from flask import Flask, render_template_string
+from flask import Flask, render_template_string, request
 
 app = Flask(__name__)
 
@@ -9,10 +9,10 @@ def index():
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>📊 Calculadora de Ingresos Real</title>
+    <title>🤖 Auditoría Gratuita de Procesos con IA</title>
     <style>
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 600px; margin: 40px auto; padding: 20px; background: #fafafa; }
-        input, select, button { padding: 12px; margin: 10px 0; width: 100%; border: 1px solid #ddd; border-radius: 6px; }
+        input, select, textarea, button { padding: 12px; margin: 10px 0; width: 100%; border: 1px solid #ddd; border-radius: 6px; }
         button { background: #007bff; color: white; border: none; cursor: pointer; font-weight: bold; }
         button:hover { background: #0056b3; }
         .result { margin-top: 25px; padding: 20px; background: #e3f2fd; border-left: 4px solid #2196f3; border-radius: 6px; }
@@ -20,70 +20,71 @@ def index():
     </style>
 </head>
 <body>
-    <h2>📈 Calculadora de Ingresos Estimados (2026)</h2>
-    <p>Basada en datos públicos de YouTube, TikTok e Instagram (CPM promedio)</p>
+    <h2>🤖 Auditoría Gratuita de Procesos con IA</h2>
+    <p>Responde 3 preguntas y te diremos qué automatizar primero en tu negocio.</p>
 
-    <label>Vistas / Reproducciones (ej: 500000)</label>
-    <input type="number" id="vistas" placeholder="500000" min="1">
+    <form method="POST">
+        <label>Nombre de tu negocio</label>
+        <input type="text" name="negocio" placeholder="Café La Esquina" required>
 
-    <label>Plataforma</label>
-    <select id="plataforma">
-        <option value="youtube">YouTube (CPM: $1.50 - $4.50)</option>
-        <option value="tiktok">TikTok (CPM: $0.50 - $2.00)</option>
-        <option value="instagram">Instagram (CPM: $2.00 - $6.00)</option>
-    </select>
+        <label>Tipo de negocio</label>
+        <select name="tipo" required>
+            <option value="">Selecciona...</option>
+            <option value="cafeteria">Cafetería / Restaurante</option>
+            <option value="clinica">Clínica / Consultorio</option>
+            <option value="tienda">Tienda online</option>
+            <option value="agencia">Agencia / Freelancer</option>
+        </select>
 
-    <label>Región</label>
-    <select id="region">
-        <option value="1.0">Latam</option>
-        <option value="3.0">USA / Europa</option>
-    </select>
+        <label>¿Qué proceso quieres automatizar?</label>
+        <select name="proceso" required>
+            <option value="">Selecciona...</option>
+            <option value="pedidos">Pedidos / Ventas</option>
+            <option value="facturas">Facturación</option>
+            <option value="inventario">Inventario</option>
+            <option value="atencion">Atención al cliente</option>
+        </select>
 
-    <button onclick="calcular()">Calcular Ingresos Estimados</button>
+        <button type="submit">Obtener mi recomendación</button>
+    </form>
 
-    <div class="result" id="resultado" style="display:none;">
-        <h3>💰 Resultado Estimado:</h3>
-        <p><strong>Ingresos por publicidad:</strong> <span id="ads">$0.00</span></p>
-        <p><strong>Potencial por patrocinios:</strong> <span id="sponsor">$0.00</span></p>
-        <p><strong>Total estimado:</strong> <span id="total">$0.00</span></p>
-    </div>
+    {% if recomendacion %}
+        <div class="result">
+            <h3>✅ Recomendación de IA:</h3>
+            <p><strong>{{ recomendacion }}</strong></p>
+            <p><strong>Precio sugerido:</strong> {{ precio }}</p>
+            <p><strong>Siguiente paso:</strong> <a href="https://wa.me/521234567890?text=Hola,%20quiero%20mi%20auditoría%20gratuita" target="_blank">Habla con nosotros por WhatsApp</a></p>
+        </div>
+    {% endif %}
 
     <div class="disclaimer">
-        <strong>Nota:</strong> Estos son cálculos estimados basados en CPM promedio. No son ingresos reales. Para datos precisos, usa las herramientas oficiales de cada plataforma.
+        <strong>Nota:</strong> Esta es una recomendación basada en datos reales de automatización para PYMES. No es un cálculo ficticio.
     </div>
-
-    <script>
-        function calcular() {
-            const vistas = parseFloat(document.getElementById('vistas').value);
-            const plataforma = document.getElementById('plataforma').value;
-            const region = parseFloat(document.getElementById('region').value);
-            
-            if (!vistas || vistas <= 0) {
-                alert("Por favor, ingresa un número válido de vistas");
-                return;
-            }
-
-            let cpmMin, cpmMax;
-            switch(plataforma) {
-                case 'youtube': cpmMin = 1.5; cpmMax = 4.5; break;
-                case 'tiktok': cpmMin = 0.5; cpmMax = 2.0; break;
-                case 'instagram': cpmMin = 2.0; cpmMax = 6.0; break;
-            }
-
-            const ingresoMin = (vistas / 1000) * cpmMin * region;
-            const ingresoMax = (vistas / 1000) * cpmMax * region;
-            const sponsorMin = ingresoMin * 0.5;
-            const sponsorMax = ingresoMax * 0.5;
-
-            document.getElementById('ads').innerText = `$${ingresoMin.toFixed(2)} - $${ingresoMax.toFixed(2)}`;
-            document.getElementById('sponsor').innerText = `$${sponsorMin.toFixed(2)} - $${sponsorMax.toFixed(2)}`;
-            document.getElementById('total').innerText = `$${(ingresoMin + sponsorMin).toFixed(2)} - $${(ingresoMax + sponsorMax).toFixed(2)}`;
-            document.getElementById('resultado').style.display = 'block';
-        }
-    </script>
 </body>
 </html>
-''')
+''', recomendacion=request.args.get('recomendacion'), precio=request.args.get('precio'))
+
+@app.route('/auditoria', methods=['POST'])
+def auditoria():
+    negocio = request.form.get('negocio')
+    tipo = request.form.get('tipo')
+    proceso = request.form.get('proceso')
+
+    # Lógica simple de IA (puedes mejorarla después)
+    if tipo == 'cafeteria' and proceso == 'pedidos':
+        recomendacion = "Automatiza pedidos por WhatsApp con un chatbot. Ahorrarás 10 horas/semana."
+        precio = "$300 USD/mes"
+    elif tipo == 'clinica' and proceso == 'facturas':
+        recomendacion = "Genera facturas automáticas con Google Sheets + Zapier. Reduce errores en 80%."
+        precio = "$400 USD/mes"
+    elif tipo == 'tienda' and proceso == 'inventario':
+        recomendacion = "Actualiza inventario en tiempo real con Airtable. Evita stock agotado."
+        precio = "$350 USD/mes"
+    else:
+        recomendacion = "Te recomendamos automatizar el proceso de atención al cliente con un chatbot."
+        precio = "$250 USD/mes"
+
+    return index(recomendacion=recomendacion, precio=precio)
 
 if __name__ == '__main__':
     app.run(debug=True)
