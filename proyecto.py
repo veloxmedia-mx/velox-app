@@ -4,87 +4,91 @@ app = Flask(__name__)
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
-    datos = None
+    d = None
     if request.method == 'POST':
         try:
-            v = int(request.form.get('v', 0))
-            plataforma = request.form.get('p', 'tt')
-            
-            # Lógica de CPM por plataforma (Promedios 2026)
-            if plataforma == 'yt':
-                cpm = 4.50  # YouTube paga mejor
-                label = "YouTube Adsense"
-            elif plataforma == 'reels':
-                cpm = 0.15
-                label = "Meta Bonus"
-            else:
-                cpm = 0.05
-                label = "TikTok Creator Rewards"
-            
-            ganancia = (v / 1000) * cpm
-            datos = {
-                "vistas": f"{v:,}",
-                "plataforma": label,
-                "pago": round(ganancia, 2),
-                "marcas": round(ganancia * 10, 2),
-                "rpm": cpm
+            vists = int(request.form.get('v', 0))
+            plat = request.form.get('p', 'yt')
+            # CPM Promedio 2026: YT ($4.5), FB ($1.2), TT ($0.05)
+            cpm = 4.5 if plat == 'yt' else (1.2 if plat == 'fb' else 0.05)
+            ganancia = (vists / 1000) * cpm
+            d = {
+                "v": vists,
+                "p": plat.upper(),
+                "money": round(ganancia, 2),
+                "brands": round(ganancia * 8, 2),
+                "cpm": cpm
             }
-        except:
-            datos = "error"
+        except: d = "error"
 
     return render_template_string('''
     <!DOCTYPE html>
     <html lang="es">
     <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>VELOX | Analytics Spy</title>
+        <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>VELOX ANALYTICS</title>
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
         <style>
-            body { background:#000; color:#fff; font-family:'Courier New', monospace; padding:15px; }
-            .spy-box { background:#0a0a0a; border:1px solid #00ff7f; padding:25px; border-radius:5px; max-width:450px; margin:auto; box-shadow: 0 0 20px rgba(0,255,127,0.1); }
-            select, input { width:100%; padding:15px; margin:10px 0; background:#000; border:1px solid #222; color:#00ff7f; font-size:1rem; box-sizing:border-box; }
-            button { width:100%; padding:15px; background:#00ff7f; color:#000; border:none; font-weight:bold; cursor:pointer; text-transform:uppercase; }
-            .panel { margin-top:20px; border:1px solid #333; padding:15px; text-align:left; background:#111; position:relative; }
-            .status { font-size:0.7rem; color:#00ff7f; margin-bottom:10px; border-bottom:1px solid #222; padding-bottom:5px; }
-            .val { font-size:1.5rem; font-weight:bold; color:#fff; }
-            .ad-area { margin-top:30px; border:1px dashed #444; padding:10px; font-size:0.7rem; }
+            :root { --accent: #00ff7f; --bg: #050505; }
+            body { background: var(--bg); color: #fff; font-family: 'Segoe UI', sans-serif; margin: 0; padding: 15px; }
+            .main { max-width: 600px; margin: auto; }
+            .card { background: #111; border: 1px solid #222; padding: 20px; border-radius: 15px; margin-top: 15px; }
+            input, select { width: 100%; padding: 12px; margin: 8px 0; background: #000; border: 1px solid #333; color: var(--accent); border-radius: 8px; box-sizing: border-box; }
+            button { width: 100%; padding: 15px; background: var(--accent); color: #000; border: none; font-weight: 900; border-radius: 8px; cursor: pointer; text-transform: uppercase; margin-top: 10px; }
+            .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px; }
+            .stat { background: #1a1a1a; padding: 15px; border-radius: 10px; border-bottom: 3px solid var(--accent); }
+            .chart-container { margin-top: 20px; height: 250px; }
         </style>
     </head>
     <body>
-        <div class="spy-box">
-            <h2 style="letter-spacing:5px;">VELOX <span style="color:#00ff7f;">SPY</span></h2>
-            <p style="font-size:0.7rem; color:#444;">ANALIZADOR DE INGRESOS MULTIPLATAFORMA</p>
-            
-            <form method="POST">
-                <select name="p">
-                    <option value="tt">TIKTOK</option>
-                    <option value="yt">YOUTUBE (Largo)</option>
-                    <option value="reels">INSTAGRAM REELS</option>
-                </select>
-                <input type="number" name="v" placeholder="Cantidad de vistas" required>
-                <button type="submit">ESPECIALIZAR CÁLCULO</button>
-            </form>
+        <div class="main">
+            <h1 style="letter-spacing:8px; text-align:center; margin:0;">VELOX<span style="color:var(--accent)">PRO</span></h1>
+            <p style="text-align:center; color:#555; font-size:0.7rem;">SISTEMA DE AUDITORÍA DE INGRESOS</p>
 
-            {% if datos and datos != "error" %}
-            <div class="panel">
-                <div class="status">STATUS: ESCANEO COMPLETADO...</div>
-                <small style="color:#666;">PLATAFORMA: {{ datos.plataforma }}</small><br>
-                <div class="val">${{ datos.pago }} <small style="font-size:0.8rem;color:#444;">USD (CPM: ${{datos.rpm}})</small></div>
-                <br>
-                <small style="color:#666;">TRATOS CON MARCAS (ESTIMADO):</small><br>
-                <div class="val" style="color:#00ff7f;">${{ datos.marcas }} USD</div>
+            <div class="card">
+                <form method="POST">
+                    <input type="text" placeholder="Pega el link del video (Opcional)" name="url">
+                    <select name="p">
+                        <option value="yt">YOUTUBE (CPM Alto)</option>
+                        <option value="fb">FACEBOOK (CPM Medio)</option>
+                        <option value="tt">TIKTOK (CPM Bajo)</option>
+                    </select>
+                    <input type="number" name="v" placeholder="Número de visitas" required>
+                    <button type="submit">ANALIZAR IMPACTO</button>
+                </form>
+
+                {% if d and d != "error" %}
+                <div class="stat-grid">
+                    <div class="stat">
+                        <small style="color:#666;">INGRESOS ESTIMADOS</small><br>
+                        <span style="font-size:1.2rem; font-weight:bold;">${{ d.money }} USD</span>
+                    </div>
+                    <div class="stat" style="border-color: #00d4ff;">
+                        <small style="color:#666;">VALOR COMERCIAL</small><br>
+                        <span style="font-size:1.2rem; font-weight:bold; color:#00d4ff;">${{ d.brands }} USD</span>
+                    </div>
+                </div>
+
+                <div class="chart-container"><canvas id="myChart"></canvas></div>
+
+                <script>
+                    const ctx = document.getElementById('myChart').getContext('2d');
+                    new Chart(ctx, {
+                        type: 'bar',
+                        data: {
+                            labels: ['AdSense', 'Marcas', 'Afiliados'],
+                            datasets: [{
+                                label: 'Proyección de Ganancias ($)',
+                                data: [{{ d.money }}, {{ d.brands }}, {{ d.money * 0.5 }}],
+                                backgroundColor: ['#00ff7f', '#00d4ff', '#ff0055']
+                            }]
+                        },
+                        options: { maintainAspectRatio: false, scales: { y: { beginAtZero: true, grid: { color: '#222' } } } }
+                    });
+                </script>
+                {% endif %}
             </div>
-            {% endif %}
-        </div>
 
-        <div class="ad-area">
-            <p>CONTENIDO PATROCINADO</p>
-            <script async="async" data-cfasync="false" src="https://pl28804683.effectivegatecpm.com/5e09cff53476280c79e769b840e93d6f/invoke.js"></script>
-            <div id="container-5e09cff53476280c79e769b840e93d6f"></div>
-        </div>
-    </body>
-    </html>
-    ''', datos=datos)
-
-if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000)
+            <div style="margin-top:30px; border:1px dashed #333; padding:15px; border-radius:10px;">
+                <p style="font-size:10px; color:#444; text-align:center;">ADSTERRA PREMIUM ADS</p>
+                <script async="async" data-cfasync="false" src="
