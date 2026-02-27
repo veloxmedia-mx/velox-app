@@ -6,73 +6,67 @@ app = Flask(__name__)
 def index():
     return render_template_string('''
 <!DOCTYPE html>
-<html>
+<html lang="es">
 <head>
-    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VELOX | AUDIT PRO</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VELOX | AUDITORIA PRO</title>
     <style>
-        body { background:#000; color:#0f0; font-family:monospace; margin:0; padding:15px; }
-        .terminal { max-width:500px; margin:auto; border:1px solid #0f0; padding:20px; box-shadow:0 0 20px #0f03; }
-        .green { color:#0f0; } .gray { color:#555; }
-        input, select { width:100%; padding:12px; background:#000; border:1px solid #0f0; color:#0f0; margin:10px 0; box-sizing:border-box; }
-        button { width:100%; padding:15px; background:#0f0; color:#000; border:none; font-weight:bold; cursor:pointer; font-family:monospace; }
-        .res { display:none; margin-top:20px; border-top:1px dashed #0f0; padding-top:20px; text-align:left; }
-        .stat { margin-bottom:10px; font-size:0.9rem; }
-        .big-money { font-size:2rem; background:#0f0; color:#000; padding:10px; text-align:center; font-weight:bold; }
+        body { background:#000; color:#0f0; font-family:'Courier New', monospace; margin:0; padding:15px; text-align:center; }
+        .terminal { max-width:450px; margin:50px auto; border:1px solid #0f0; padding:30px; box-shadow:0 0 15px #0f04; background:#050505; border-radius:10px; }
+        h1 { font-size:2rem; letter-spacing:8px; margin-bottom:5px; text-shadow:0 0 10px #0f0; }
+        .tag { font-size:0.6rem; color:#555; margin-bottom:30px; letter-spacing:3px; }
+        input, select { width:100%; padding:15px; margin:10px 0; background:#000; border:1px solid #0f0; color:#0f0; font-family:monospace; font-size:1.1rem; box-sizing:border-box; }
+        button { width:100%; padding:18px; background:#0f0; color:#000; border:none; font-weight:bold; cursor:pointer; font-size:1rem; margin-top:10px; transition:0.3s; }
+        button:hover { background:#fff; box-shadow:0 0 20px #fff; }
+        #res { display:none; margin-top:25px; text-align:left; border-top:1px dashed #0f0; padding-top:20px; }
+        .money-box { background:#0f0; color:#000; padding:15px; font-size:1.8rem; font-weight:900; text-align:center; margin-top:10px; }
+        .ad-space { margin-top:40px; border:1px solid #222; padding:15px; background:#080808; }
     </style>
 </head>
 <body>
     <div class="terminal">
-        <h1 style="text-align:center; letter-spacing:5px;">VELOX_AUDIT_v5</h1>
-        <p class="gray">SISTEMA DE ANÁLISIS DE INGRESOS 2026</p>
+        <h1>VELOX</h1>
+        <div class="tag">REVENUE AUDIT SYSTEM v6.0</div>
         
-        <label class="green">> INSERTE LINK DEL VIDEO:</label>
-        <input type="text" id="url" placeholder="https://youtube.com/...">
-        
-        <label class="green">> SELECCIONE REGIÓN:</label>
-        <select id="region">
-            <option value="2.5">LATAM (CPM Promedio)</option>
-            <option value="12.0">USA / EUROPA (CPM Alto)</option>
+        <input type="text" id="link" placeholder="INSERTE LINK DEL VIDEO">
+        <select id="plataforma">
+            <option value="4.5">YOUTUBE (CPM ALTO)</option>
+            <option value="1.2">FACEBOOK (CPM MEDIO)</option>
+            <option value="0.05">TIKTOK (CPM BAJO)</option>
         </select>
+        <input type="number" id="vistas" placeholder="CANTIDAD DE VISTAS">
         
-        <label class="green">> VISTAS REGISTRADAS:</label>
-        <input type="number" id="vistas" placeholder="0">
-        
-        <button onclick="auditar()">EJECUTAR AUDITORÍA</button>
+        <button onclick="ejecutar()">INICIAR ESCANEO</button>
 
-        <div id="resultado" class="res">
-            <div class="stat">> ESCANEANDO LINK... <span id="l_url"></span></div>
-            <div class="stat">> PAGO PUBLICIDAD: <span id="r_ads"></span> USD</div>
-            <div class="stat">> VALOR DE MARCAS: <span id="r_marcas"></span> USD</div>
-            <div class="stat">> CALIDAD DE TRÁFICO: <span id="r_cal"></span></div>
-            <br>
-            <div class="gray">POTENCIAL TOTAL GENERADO:</div>
-            <div class="big-money" id="r_total"></div>
+        <div id="res">
+            <div style="font-size:0.7rem; color:#0f0; margin-bottom:10px;">> ESCANEO EXITOSO...</div>
+            <strong>ADSENSE EST:</strong> <span id="pago" style="color:#fff;"></span> USD<br>
+            <strong>SPONSORS EST:</strong> <span id="marcas" style="color:#fff;"></span> USD<br><br>
+            <div style="font-size:0.7rem; color:#0f0;">> POTENCIAL TOTAL DE GANANCIA:</div>
+            <div class="money-box" id="total"></div>
         </div>
     </div>
 
-    <div style="margin-top:30px; text-align:center;">
-        <p class="gray" style="font-size:10px;">ANUNCIO PATROCINADO - ADSTERRA</p>
+    <div class="ad-space">
+        <p style="font-size:10px; color:#444; margin-bottom:15px;">ANUNCIO PATROCINADO</p>
         <script async="async" data-cfasync="false" src="https://pl28804683.effectivegatecpm.com/5e09cff53476280c79e769b840e93d6f/invoke.js"></script>
         <div id="container-5e09cff53476280c79e769b840e93d6f"></div>
     </div>
 
     <script>
-        function auditar() {
+        function ejecutar() {
             let v = document.getElementById('vistas').value;
-            let cpm = document.getElementById('region').value;
-            let url = document.getElementById('url').value;
-            if(!v) return alert("Pon las vistas, fiera.");
+            let cpm = document.getElementById('plataforma').value;
+            if(!v || v <= 0) { alert("ERROR: INGRESE VISTAS VALIDAS"); return; }
 
             let ads = (v / 1000) * cpm;
-            let marcas = ads * 12;
-            
-            document.getElementById('l_url').innerText = url.substring(0,25) + "...";
-            document.getElementById('r_ads').innerText = ads.toFixed(2);
-            document.getElementById('r_marcas').innerText = marcas.toFixed(2);
-            document.getElementById('r_cal').innerText = cpm > 3 ? "PREMIUM" : "ESTÁNDAR";
-            document.getElementById('r_total').innerText = "$" + (ads + marcas).toFixed(2);
-            document.getElementById('resultado').style.display = 'block';
+            let m = ads * 12; // Estimado de marcas pro
+
+            document.getElementById('pago').innerText = ads.toLocaleString('en-US', {minimumFractionDigits: 2});
+            document.getElementById('marcas').innerText = m.toLocaleString('en-US', {minimumFractionDigits: 2});
+            document.getElementById('total').innerText = "$" + (ads + m).toLocaleString('en-US', {minimumFractionDigits: 2}) + " USD";
+            document.getElementById('res').style.display = 'block';
         }
     </script>
 </body>
