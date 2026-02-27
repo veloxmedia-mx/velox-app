@@ -9,64 +9,76 @@ def index():
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VELOX | AUDITORIA PRO</title>
+    <title>📊 Calculadora de Ingresos Real</title>
     <style>
-        body { background:#000; color:#0f0; font-family:'Courier New', monospace; margin:0; padding:15px; text-align:center; }
-        .terminal { max-width:450px; margin:50px auto; border:1px solid #0f0; padding:30px; box-shadow:0 0 15px #0f04; background:#050505; border-radius:10px; }
-        h1 { font-size:2rem; letter-spacing:8px; margin-bottom:5px; text-shadow:0 0 10px #0f0; }
-        .tag { font-size:0.6rem; color:#555; margin-bottom:30px; letter-spacing:3px; }
-        input, select { width:100%; padding:15px; margin:10px 0; background:#000; border:1px solid #0f0; color:#0f0; font-family:monospace; font-size:1.1rem; box-sizing:border-box; }
-        button { width:100%; padding:18px; background:#0f0; color:#000; border:none; font-weight:bold; cursor:pointer; font-size:1rem; margin-top:10px; transition:0.3s; }
-        button:hover { background:#fff; box-shadow:0 0 20px #fff; }
-        #res { display:none; margin-top:25px; text-align:left; border-top:1px dashed #0f0; padding-top:20px; }
-        .money-box { background:#0f0; color:#000; padding:15px; font-size:1.8rem; font-weight:900; text-align:center; margin-top:10px; }
-        .ad-space { margin-top:40px; border:1px solid #222; padding:15px; background:#080808; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 600px; margin: 40px auto; padding: 20px; background: #fafafa; }
+        input, select, button { padding: 12px; margin: 10px 0; width: 100%; border: 1px solid #ddd; border-radius: 6px; }
+        button { background: #007bff; color: white; border: none; cursor: pointer; font-weight: bold; }
+        button:hover { background: #0056b3; }
+        .result { margin-top: 25px; padding: 20px; background: #e3f2fd; border-left: 4px solid #2196f3; border-radius: 6px; }
+        .disclaimer { font-size: 0.8rem; color: #666; margin-top: 20px; }
     </style>
 </head>
 <body>
-    <div class="terminal">
-        <h1>VELOX</h1>
-        <div class="tag">REVENUE AUDIT SYSTEM v6.0</div>
-        
-        <input type="text" id="link" placeholder="INSERTE LINK DEL VIDEO">
-        <select id="plataforma">
-            <option value="4.5">YOUTUBE (CPM ALTO)</option>
-            <option value="1.2">FACEBOOK (CPM MEDIO)</option>
-            <option value="0.05">TIKTOK (CPM BAJO)</option>
-        </select>
-        <input type="number" id="vistas" placeholder="CANTIDAD DE VISTAS">
-        
-        <button onclick="ejecutar()">INICIAR ESCANEO</button>
+    <h2>📈 Calculadora de Ingresos Estimados (2026)</h2>
+    <p>Basada en datos públicos de YouTube, TikTok e Instagram (CPM promedio)</p>
 
-        <div id="res">
-            <div style="font-size:0.7rem; color:#0f0; margin-bottom:10px;">> ESCANEO EXITOSO...</div>
-            <strong>ADSENSE EST:</strong> <span id="pago" style="color:#fff;"></span> USD<br>
-            <strong>SPONSORS EST:</strong> <span id="marcas" style="color:#fff;"></span> USD<br><br>
-            <div style="font-size:0.7rem; color:#0f0;">> POTENCIAL TOTAL DE GANANCIA:</div>
-            <div class="money-box" id="total"></div>
-        </div>
+    <label>Vistas / Reproducciones (ej: 500000)</label>
+    <input type="number" id="vistas" placeholder="500000" min="1">
+
+    <label>Plataforma</label>
+    <select id="plataforma">
+        <option value="youtube">YouTube (CPM: $1.50 - $4.50)</option>
+        <option value="tiktok">TikTok (CPM: $0.50 - $2.00)</option>
+        <option value="instagram">Instagram (CPM: $2.00 - $6.00)</option>
+    </select>
+
+    <label>Región</label>
+    <select id="region">
+        <option value="1.0">Latam</option>
+        <option value="3.0">USA / Europa</option>
+    </select>
+
+    <button onclick="calcular()">Calcular Ingresos Estimados</button>
+
+    <div class="result" id="resultado" style="display:none;">
+        <h3>💰 Resultado Estimado:</h3>
+        <p><strong>Ingresos por publicidad:</strong> <span id="ads">$0.00</span></p>
+        <p><strong>Potencial por patrocinios:</strong> <span id="sponsor">$0.00</span></p>
+        <p><strong>Total estimado:</strong> <span id="total">$0.00</span></p>
     </div>
 
-    <div class="ad-space">
-        <p style="font-size:10px; color:#444; margin-bottom:15px;">ANUNCIO PATROCINADO</p>
-        <script async="async" data-cfasync="false" src="https://pl28804683.effectivegatecpm.com/5e09cff53476280c79e769b840e93d6f/invoke.js"></script>
-        <div id="container-5e09cff53476280c79e769b840e93d6f"></div>
+    <div class="disclaimer">
+        <strong>Nota:</strong> Estos son cálculos estimados basados en CPM promedio. No son ingresos reales. Para datos precisos, usa las herramientas oficiales de cada plataforma.
     </div>
 
     <script>
-        function ejecutar() {
-            let v = document.getElementById('vistas').value;
-            let cpm = document.getElementById('plataforma').value;
-            if(!v || v <= 0) { alert("ERROR: INGRESE VISTAS VALIDAS"); return; }
+        function calcular() {
+            const vistas = parseFloat(document.getElementById('vistas').value);
+            const plataforma = document.getElementById('plataforma').value;
+            const region = parseFloat(document.getElementById('region').value);
+            
+            if (!vistas || vistas <= 0) {
+                alert("Por favor, ingresa un número válido de vistas");
+                return;
+            }
 
-            let ads = (v / 1000) * cpm;
-            let m = ads * 12; // Estimado de marcas pro
+            let cpmMin, cpmMax;
+            switch(plataforma) {
+                case 'youtube': cpmMin = 1.5; cpmMax = 4.5; break;
+                case 'tiktok': cpmMin = 0.5; cpmMax = 2.0; break;
+                case 'instagram': cpmMin = 2.0; cpmMax = 6.0; break;
+            }
 
-            document.getElementById('pago').innerText = ads.toLocaleString('en-US', {minimumFractionDigits: 2});
-            document.getElementById('marcas').innerText = m.toLocaleString('en-US', {minimumFractionDigits: 2});
-            document.getElementById('total').innerText = "$" + (ads + m).toLocaleString('en-US', {minimumFractionDigits: 2}) + " USD";
-            document.getElementById('res').style.display = 'block';
+            const ingresoMin = (vistas / 1000) * cpmMin * region;
+            const ingresoMax = (vistas / 1000) * cpmMax * region;
+            const sponsorMin = ingresoMin * 0.5;
+            const sponsorMax = ingresoMax * 0.5;
+
+            document.getElementById('ads').innerText = `$${ingresoMin.toFixed(2)} - $${ingresoMax.toFixed(2)}`;
+            document.getElementById('sponsor').innerText = `$${sponsorMin.toFixed(2)} - $${sponsorMax.toFixed(2)}`;
+            document.getElementById('total').innerText = `$${(ingresoMin + sponsorMin).toFixed(2)} - $${(ingresoMax + sponsorMax).toFixed(2)}`;
+            document.getElementById('resultado').style.display = 'block';
         }
     </script>
 </body>
@@ -74,4 +86,4 @@ def index():
 ''')
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000)
+    app.run(debug=True)
