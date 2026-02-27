@@ -3,7 +3,6 @@ import yt_dlp
 
 app = Flask(__name__)
 
-# AQUÍ ESTÁ TODA TU PÁGINA (DISEÑO + ANUNCIOS)
 HTML_LAYOUT = """
 <!DOCTYPE html>
 <html lang="es">
@@ -32,14 +31,18 @@ HTML_LAYOUT = """
 
         {% if video_url %}
         <div class="result">
-            <p style="color: #ff00ff;">¡VIDEO LISTO!</p>
-            <a href="{{ video_url }}" class="download-btn" target="_blank">DESCARGAR AHORA</a>
-            
-            <div class="ad-container">
-                <p style="font-size: 10px; color: #666;">PUBLICIDAD RECOMENDADA</p>
-                <script async="async" data-cfasync="false" src="https://pl28804683.effectivegatecpm.com/5e09cff53476280c79e769b840e93d6f/invoke.js"></script>
-                <div id="container-5e09cff53476280c79e769b840e93d6f"></div>
-            </div>
+            {% if video_url == "error" %}
+                <p style="color: red;">Error: TikTok bloqueó la conexión. Intenta de nuevo.</p>
+            {% else %}
+                <p style="color: #ff00ff;">¡VIDEO LISTO!</p>
+                <a href="{{ video_url }}" class="download-btn" target="_blank" referrerpolicy="no-referrer">DESCARGAR AHORA</a>
+                
+                <div class="ad-container">
+                    <p style="font-size: 10px; color: #666;">PUBLICIDAD RECOMENDADA</p>
+                    <script async="async" data-cfasync="false" src="https://pl28804683.effectivegatecpm.com/5e09cff53476280c79e769b840e93d6f/invoke.js"></script>
+                    <div id="container-5e09cff53476280c79e769b840e93d6f"></div>
+                </div>
+            {% endif %}
         </div>
         {% endif %}
     </div>
@@ -54,11 +57,18 @@ def home():
     if request.method == 'POST':
         url = request.form.get('url')
         try:
-            ydl_opts = {'format': 'best', 'quiet': True}
+            # Aquí está el truco: añadimos un User-Agent real
+            ydl_opts = {
+                'format': 'best',
+                'quiet': True,
+                'user_agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+                'nocheckcertificate': True
+            }
             with yt_dlp.YoutubeDL(ydl_opts) as ydl:
                 info = ydl.extract_info(url, download=False)
                 video_url = info.get('url')
-        except:
+        except Exception as e:
+            print(f"Error: {e}")
             video_url = "error"
     return render_template_string(HTML_LAYOUT, video_url=video_url)
 
