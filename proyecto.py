@@ -7,82 +7,60 @@ def index():
     datos = None
     if request.method == 'POST':
         try:
-            vistas = int(request.form.get('vistas', 0))
-            pais = request.form.get('pais', 'latam')
-            # Factor de pago según región
-            multiplicador = 1.0 if pais == 'latam' else 4.5
-            
-            ganancia_min = (vistas * 0.02 / 1000) * multiplicador
-            ganancia_max = (vistas * 0.05 / 1000) * multiplicador
-            
+            v = int(request.form.get('v', 0))
+            # Cálculo directo: $0.05 por cada 1k vistas
+            pago_directo = (v / 1000) * 0.05
             datos = {
-                "vistas": f"{vistas:,}",
-                "min": round(ganancia_min, 2),
-                "max": round(ganancia_max, 2),
-                "marca": round(ganancia_min * 8, 2),
-                "pais": "Estados Unidos / Europa" if pais == 'usa' else "Latinoamérica"
+                "vistas": f"{v:,}",
+                "pago": round(pago_directo, 2),
+                "marcas": round(pago_directo * 12, 2)
             }
         except:
             datos = "error"
 
-    html = """
+    return render_template_string('''
     <!DOCTYPE html>
     <html lang="es">
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>VELOX | Money Calc</title>
+        <title>VELOX MONEY</title>
         <style>
-            :root { --money: #00ff7f; --bg: #050505; }
-            body { background: var(--bg); color: #fff; font-family: 'Inter', sans-serif; margin: 0; padding: 20px; text-align: center; }
-            .container { max-width: 450px; margin: auto; }
-            .calc-card { background: #111; padding: 30px; border-radius: 25px; border: 1px solid #222; margin-top: 20px; }
-            input, select { width: 100%; padding: 15px; background: #000; border: 1px solid #333; border-radius: 12px; color: var(--money); font-size: 1.2rem; text-align: center; margin-bottom: 15px; box-sizing: border-box; }
-            button { width: 100%; padding: 18px; background: var(--money); color: #000; border: none; border-radius: 12px; font-weight: 900; cursor: pointer; text-transform: uppercase; }
-            .res-card { background: #1a1a1a; padding: 20px; border-radius: 15px; margin-top: 15px; border-left: 4px solid var(--money); text-align: left; }
-            .ad-box { margin-top: 40px; border: 1px dashed #333; padding: 15px; border-radius: 10px; }
+            body { background:#000; color:#fff; font-family:sans-serif; text-align:center; padding:10px; }
+            .card { background:#111; border:2px solid #00ff7f; padding:25px; border-radius:15px; max-width:380px; margin:20px auto; }
+            input { width:100%; padding:15px; background:#000; border:1px solid #333; color:#00ff7f; font-size:1.5rem; border-radius:10px; margin-bottom:10px; box-sizing:border-box; }
+            button { width:100%; padding:15px; background:#00ff7f; color:#000; border:none; font-weight:bold; border-radius:10px; cursor:pointer; font-size:1.1rem; }
+            .res { margin-top:20px; background:#1a1a1a; padding:15px; border-radius:10px; text-align:left; border-left:4px solid #00ff7f; }
+            .ad { margin-top:30px; min-height:250px; background:#050505; border:1px dashed #444; padding:10px; }
         </style>
     </head>
     <body>
-        <div class="container">
-            <h1 style="letter-spacing:10px;">VELOX<span style="color:var(--money);">$</span></h1>
-            <p style="font-size:0.7rem; color:#555; letter-spacing:3px;">CALCULADORA DE INGRESOS PRO</p>
+        <h1 style="letter-spacing:5px; margin-bottom:0;">VELOX <span style="color:#00ff7f;">$</span></h1>
+        <p style="font-size:0.8rem; color:#666;">CALCULADORA DE INGRESOS REALES</p>
 
-            <div class="calc-card">
-                <form method="POST">
-                    <input type="number" name="vistas" placeholder="Número de vistas" required>
-                    <select name="pais">
-                        <option value="latam">Audiencia: Latinoamérica</option>
-                        <option value="usa">Audiencia: USA / Europa (Paga más)</option>
-                    </select>
-                    <button type="submit">CALCULAR MI DINERO</button>
-                </form>
+        <div class="card">
+            <form method="POST">
+                <input type="number" name="v" placeholder="Vistas del video" required>
+                <button type="submit">CALCULAR GANANCIA</button>
+            </form>
 
-                {% if datos and datos != "error" %}
-                <div class="result">
-                    <div class="res-card">
-                        <small style="color:#888;">REGIÓN: {{ datos.pais }}</small><br>
-                        <strong>PAGO TIKTOK:</strong><br>
-                        <span style="font-size:1.5rem;">${{ datos.min }} - ${{ datos.max }} USD</span>
-                    </div>
-                    <div class="res-card" style="border-left-color:#00d4ff;">
-                        <strong>VALOR CON MARCAS:</strong><br>
-                        <span style="font-size:1.5rem; color:#00d4ff;">${{ datos.marca }} USD</span>
-                    </div>
-                </div>
-                {% endif %}
+            {% if datos and datos != "error" %}
+            <div class="res">
+                <small style="color:#888;">PARA {{ datos.vistas }} VISTAS:</small><br>
+                <p><strong>PAGO TIKTOK:</strong> <span style="color:#00ff7f;">${{ datos.pago }} USD</span></p>
+                <p><strong>CON MARCAS:</strong> <span style="color:#00ff7f;">${{ datos.marcas }} USD</span></p>
             </div>
+            {% endif %}
+        </div>
 
-            <div class="ad-box">
-                <p style="font-size:10px; color:#444;">ANUNCIO PATROCINADO</p>
-                <script async="async" data-cfasync="false" src="https://pl28804683.effectivegatecpm.com/5e09cff53476280c79e769b840e93d6f/invoke.js"></script>
-                <div id="container-5e09cff53476280c79e769b840e93d6f"></div>
-            </div>
+        <div class="ad">
+            <p style="font-size:10px; color:#444;">PUBLICIDAD (GANA DINERO AQUÍ)</p>
+            <script async="async" data-cfasync="false" src="https://pl28804683.effectivegatecpm.com/5e09cff53476280c79e769b840e93d6f/invoke.js"></script>
+            <div id="container-5e09cff53476280c79e769b840e93d6f"></div>
         </div>
     </body>
     </html>
-    """
-    return render_template_string(html, datos=datos)
+    ''', datos=datos)
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000)
