@@ -3,7 +3,7 @@ import yt_dlp
 
 app = Flask(__name__)
 
-# DISEÑO PREMIUM CORREGIDO
+# DISEÑO PREMIUM + MOTOR ANTIBLOQUEO
 html_content = """
 <!DOCTYPE html>
 <html lang="es">
@@ -18,8 +18,8 @@ html_content = """
         .input-group { width: 90%; max-width: 400px; }
         input { width: 100%; padding: 15px; background: transparent; border: 1px solid #00ff7f; border-radius: 10px; color: #fff; text-align: center; margin-bottom: 20px; box-sizing: border-box; }
         button { width: 100%; padding: 15px; background: #fff; color: #000; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; letter-spacing: 1px; }
-        .btn-download { background: #00ff7f; color: #000; padding: 15px; text-decoration: none; display: block; border-radius: 10px; font-weight: bold; margin-top: 20px; }
-        .ad-container { margin-top: 30px; padding: 10px; background: rgba(255,255,255,0.05); border-radius: 8px; width: 100%; }
+        .btn-download { background: #00ff7f !important; color: #000 !important; padding: 20px; text-decoration: none; display: block; border-radius: 10px; font-weight: bold; margin-top: 25px; box-shadow: 0 0 15px #00ff7f; }
+        .ad-container { margin-top: 30px; padding: 10px; background: rgba(255,255,255,0.05); border-radius: 8px; }
     </style>
 </head>
 <body>
@@ -33,17 +33,20 @@ html_content = """
         </form>
 
         {% if video_url %}
-            <a href="{{ video_url }}" class="btn-download" target="_blank">¡DESCARGAR AHORA!</a>
-            <p style="font-size: 0.7rem; color: #666; margin-top: 5px;">(Si no inicia, mantén presionado y dale "Descargar vínculo")</p>
-            
-            <div class="ad-container">
-                <p style="font-size: 0.6rem; color: #444;">PUBLICIDAD</p>
-                <script async="async" data-cfasync="false" src="https://pl28804683.effectivegatecpm.com/5e09cff53476280c79e769b840e93d6f/invoke.js"></script>
-                <div id="container-5e09cff53476280c79e769b840e93d6f"></div>
+            <div id="success-area">
+                <p style="color: #00ff7f; margin-top: 20px;">¡VIDEO LOCALIZADO!</p>
+                <a href="{{ video_url }}" class="btn-download" target="_blank" rel="noopener noreferrer">¡DESCARGAR AHORA!</a>
+                
+                <p style="font-size: 0.7rem; color: #888; margin-top: 10px;">TIP: Si se abre el video, dale a los 3 puntitos y 'Descargar' o mantén presionado el botón.</p>
+
+                <div class="ad-container">
+                    <p style="font-size: 0.6rem; color: #444;">PUBLICIDAD RECOMENDADA</p>
+                    <script async="async" data-cfasync="false" src="https://pl28804683.effectivegatecpm.com/5e09cff53476280c79e769b840e93d6f/invoke.js"></script>
+                    <div id="container-5e09cff53476280c79e769b840e93d6f"></div>
+                </div>
             </div>
         {% endif %}
     </div>
-    <div style="margin-top: 40px; font-size: 0.5rem; color: #222; letter-spacing: 2px;">CIFRADO DE EXTREMO A EXTREMO</div>
 </body>
 </html>
 """
@@ -54,12 +57,26 @@ def index():
     if request.method == 'POST':
         url = request.form.get('url')
         try:
-            ydl_opts = {'format': 'best', 'quiet': True}
+            # Nueva configuración para saltar el Error 403
+            ydl_opts = {
+                'format': 'bestvideo+bestaudio/best',
+                'quiet': True,
+                'no_warnings': True,
+                # Usamos un User-Agent de móvil para que TikTok suelte el video más fácil
+                'user_agent': 'Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Mobile Safari/537.36',
+                'nocheckcertificate': True,
+                'add_header': [
+                    'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8',
+                    'Accept-Language: en-US,en;q=0.5',
+                ]
+            }
             with yt_dlp.YoutubeDL(ydl_opts) as ydl:
                 info = ydl.extract_info(url, download=False)
+                # Buscamos la URL directa más limpia
                 video_url = info.get('url')
         except Exception as e:
-            print(f"Error: {e}")
+            print(f"Error crítico: {e}")
+            
     return render_template_string(html_content, video_url=video_url)
 
 if __name__ == '__main__':
