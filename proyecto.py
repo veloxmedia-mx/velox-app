@@ -17,7 +17,8 @@ HTML_LAYOUT = """
         input { width: 100%; padding: 12px; margin-bottom: 20px; background: #222; border: 1px solid #ff00ff; color: #00ff00; box-sizing: border-box; }
         button { background: #ff00ff; color: #fff; border: none; padding: 15px; font-size: 1.2rem; cursor: pointer; width: 100%; font-weight: bold; box-shadow: 5px 5px #00ff00; }
         .result { margin-top: 30px; border-top: 2px dashed #00ff00; padding-top: 20px; }
-        .download-btn { background: #00ff00; color: #000; text-decoration: none; padding: 10px 20px; display: inline-block; font-weight: bold; margin-bottom: 20px; }
+        .download-btn { background: #00ff00; color: #000; text-decoration: none; padding: 15px 25px; display: inline-block; font-weight: bold; margin-bottom: 20px; border-radius: 5px; animation: pulse 1.5s infinite; }
+        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
         .ad-container { margin-top: 20px; background: #111; padding: 10px; border: 1px solid #333; }
     </style>
 </head>
@@ -32,10 +33,15 @@ HTML_LAYOUT = """
         {% if video_url %}
         <div class="result">
             {% if video_url == "error" %}
-                <p style="color: red;">Error: TikTok bloqueó la conexión. Intenta de nuevo.</p>
+                <p style="color: red;">Error: No pudimos obtener el video. Intenta con otro link.</p>
             {% else %}
                 <p style="color: #ff00ff;">¡VIDEO LISTO!</p>
-                <a href="{{ video_url }}" class="download-btn" target="_blank" referrerpolicy="no-referrer">DESCARGAR AHORA</a>
+                <video width="100%" controls style="margin-bottom: 10px; border: 1px solid #ff00ff;">
+                    <source src="{{ video_url }}" type="video/mp4">
+                    Tu navegador no soporta el video.
+                </video>
+                <br>
+                <a href="{{ video_url }}" class="download-btn" download="video_velox.mp4" target="_blank" rel="noreferrer">CLIC DERECHO / MANTÉN PARA GUARDAR</a>
                 
                 <div class="ad-container">
                     <p style="font-size: 10px; color: #666;">PUBLICIDAD RECOMENDADA</p>
@@ -57,18 +63,25 @@ def home():
     if request.method == 'POST':
         url = request.form.get('url')
         try:
-            # Aquí está el truco: añadimos un User-Agent real
+            # Forzamos a buscar la versión sin marca de agua si es posible
             ydl_opts = {
-                'format': 'best',
+                'format': 'bestvideo+bestaudio/best',
                 'quiet': True,
-                'user_agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-                'nocheckcertificate': True
+                'no_warnings': True,
+                'outtmpl': '-',
+                'nocheckcertificate': True,
+                'headers': {
+                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36',
+                    'Accept': 'video/webm,video/any,video/*;q=0.9,application/json;q=0.7',
+                    'Accept-Language': 'en-US,en;q=0.9',
+                    'Referer': 'https://www.tiktok.com/',
+                }
             }
             with yt_dlp.YoutubeDL(ydl_opts) as ydl:
                 info = ydl.extract_info(url, download=False)
+                # Intentamos obtener la URL directa del video
                 video_url = info.get('url')
-        except Exception as e:
-            print(f"Error: {e}")
+        except:
             video_url = "error"
     return render_template_string(HTML_LAYOUT, video_url=video_url)
 
