@@ -3,13 +3,21 @@ import random
 
 app = Flask(__name__)
 
-# Base de datos de ganchos virales
+# Bases de datos más completas
 hooks = [
-    "El secreto que las marcas de {} no quieren que sepas...",
-    "3 herramientas gratuitas de {} que te ahorrarán horas.",
-    "Por esto tu contenido de {} no está funcionando.",
-    "Cómo logré pasar de 0 a 10k seguidores hablando de {}.",
-    "Deja de hacer esto si quieres crecer en el nicho de {}."
+    "El secreto que nadie te cuenta sobre {}.",
+    "Deja de cometer este error si haces {}.",
+    "3 herramientas que cambiarán tu forma de hacer {}.",
+    "Cómo pasé de novato a experto en {} en 30 días.",
+    "Lo que daría por saber esto antes de empezar en {}."
+]
+
+tips = [
+    "Enfócate en la calidad, no en la cantidad.",
+    "Aplica la regla de los 2 minutos para mejorar.",
+    "Analiza lo que hace tu competencia y hazlo un 1% mejor.",
+    "La constancia vence al talento siempre.",
+    "Usa ganchos visuales además de los hablados."
 ]
 
 html_content = """
@@ -18,54 +26,62 @@ html_content = """
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VELOX - Creator Tools</title>
+    <title>VELOX - Creator AI</title>
     <style>
-        body { background-color: #050505; color: #ffffff; font-family: sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; margin: 0; text-align: center; }
-        .logo { font-size: 3rem; font-weight: 100; letter-spacing: 10px; margin-bottom: 5px; }
-        .subtitle { font-size: 0.7rem; letter-spacing: 4px; color: #00ff7f; margin-bottom: 40px; }
-        .container { width: 90%; max-width: 450px; }
-        input { width: 100%; padding: 15px; background: transparent; border: 1px solid #00ff7f; border-radius: 10px; color: #fff; text-align: center; margin-bottom: 20px; box-sizing: border-box; }
-        button { width: 100%; padding: 15px; background: #fff; color: #000; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; text-transform: uppercase; }
-        .hook-box { margin-top: 30px; padding: 20px; border: 1px dashed #00ff7f; border-radius: 10px; background: rgba(0, 255, 127, 0.05); }
-        .ad-container { margin-top: 40px; min-height: 250px; background: rgba(255,255,255,0.03); border-radius: 10px; padding: 10px; }
+        body { background-color: #050505; color: #ffffff; font-family: 'Segoe UI', sans-serif; display: flex; flex-direction: column; align-items: center; min-height: 100vh; margin: 0; padding: 20px; }
+        .logo { font-size: 2.5rem; font-weight: 100; letter-spacing: 8px; margin-top: 50px; }
+        .subtitle { font-size: 0.6rem; letter-spacing: 3px; color: #00ff7f; margin-bottom: 40px; }
+        .card { background: #111; border: 1px solid #222; padding: 25px; border-radius: 20px; width: 100%; max-width: 400px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        input { width: 100%; padding: 15px; background: #1a1a1a; border: 1px solid #333; border-radius: 12px; color: #fff; margin-bottom: 15px; box-sizing: border-box; }
+        button { width: 100%; padding: 15px; background: #00ff7f; color: #000; border: none; border-radius: 12px; font-weight: bold; cursor: pointer; transition: 0.3s; }
+        button:hover { background: #fff; }
+        .result-item { text-align: left; margin-top: 25px; border-left: 2px solid #00ff7f; padding-left: 15px; }
+        .label { font-size: 0.7rem; color: #00ff7f; text-transform: uppercase; font-weight: bold; }
+        .content { font-size: 1.1rem; margin: 5px 0 15px 0; }
+        .ad-space { margin-top: 30px; border-radius: 15px; overflow: hidden; background: #000; padding: 10px; border: 1px solid #1a1a1a; }
     </style>
 </head>
 <body>
     <div class="logo">V E L O X</div>
-    <div class="subtitle">CREATOR AI TOOLS</div>
+    <div class="subtitle">CREATOR AI ENGINE</div>
 
-    <div class="container">
+    <div class="card">
         <form method="POST">
-            <input type="text" name="topic" placeholder="¿De qué trata tu video? (ej: Fitness)" required>
-            <button type="submit">GENERAR GANCHO VIRAL</button>
+            <input type="text" name="topic" placeholder="Ej: Fitness, Gaming, Cocina..." required>
+            <button type="submit">GENERAR ESTRATEGIA VIRAL</button>
         </form>
 
-        {% if result %}
-            <div class="hook-box">
-                <p style="color: #00ff7f; font-size: 0.8rem;">TU GANCHO LISTO:</p>
-                <h3 style="font-size: 1.2rem; line-height: 1.5;">{{ result }}</h3>
-            </div>
-            
-            <div class="ad-container">
-                <p style="font-size: 0.6rem; color: #444;">CONTENIDO PATROCINADO</p>
-                <script async="async" data-cfasync="false" src="https://pl28804683.effectivegatecpm.com/5e09cff53476280c79e769b840e93d6f/invoke.js"></script>
-                <div id="container-5e09cff53476280c79e769b840e93d6f"></div>
+        {% if hook %}
+            <div class="result-item">
+                <div class="label">Gancho de inicio (0-3 seg):</div>
+                <p class="content">"{{ hook }}"</p>
+                
+                <div class="label">Tip de valor:</div>
+                <p class="content">{{ tip }}</p>
+                
+                <div class="label">Llamado a la acción:</div>
+                <p class="content">"Dale like si quieres la parte 2 de {{ topic }}."</p>
             </div>
         {% endif %}
     </div>
-    <div style="margin-top: 50px; font-size: 0.5rem; color: #222; letter-spacing: 2px;">HERRAMIENTAS PROFESIONALES PARA CREADORES</div>
+
+    <div class="ad-space">
+        <p style="font-size: 10px; color: #333;">PUBLICIDAD RECOMENDADA</p>
+        <script async="async" data-cfasync="false" src="https://pl28804683.effectivegatecpm.com/5e09cff53476280c79e769b840e93d6f/invoke.js"></script>
+        <div id="container-5e09cff53476280c79e769b840e93d6f"></div>
+    </div>
 </body>
 </html>
 """
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
-    result = None
+    hook, tip, topic = None, None, None
     if request.method == 'POST':
         topic = request.form.get('topic')
-        template = random.choice(hooks)
-        result = template.format(topic)
-    return render_template_string(html_content, result=result)
+        hook = random.choice(hooks).format(topic)
+        tip = random.choice(tips)
+    return render_template_string(html_content, hook=hook, tip=tip, topic=topic)
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000)
